@@ -1,0 +1,5 @@
+<Bindings>
+	<Binding name="WANDERERBESTIARY_TOGGLE" header="WANDERERBESTIARY">
+		WandererBestiary_Toggle()
+	</Binding>
+</Bindings>

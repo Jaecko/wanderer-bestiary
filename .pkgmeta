@@ -1,0 +1,17 @@
+# BigWigs packager: the zip is the addon folder "WandererBestiary", the changelog of the version is CHANGELOG.md
+# (written at each release from the full changelog).
+package-as: WandererBestiary
+
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+ignore:
+  - README.md
+
+# Shown on CurseForge: Wanderer Bestiary needs Wanderer, and pairs with Wanderer Quests and Wanderer Maps.
+required-dependencies:
+  - wanderer
+optional-dependencies:
+  - wanderer-quests
+  - wanderer-maps

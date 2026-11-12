@@ -1,0 +1,34 @@
+## Interface: 16001
+## Title: Wanderer Bestiary
+## Notes: A bestiary of the creatures of the world: their 3D model, strength and spells, where they live, and your hunting log.
+## Notes-frFR: Un bestiaire des créatures du monde : leur modèle 3D, leur force et leurs sorts, où elles vivent, et votre tableau de chasse.
+## Notes-deDE: Ein Bestiarium der Kreaturen der Welt: ihr 3D-Modell, ihre Stärke und Zauber, wo sie leben, und deine Jagdliste.
+## Notes-esES: Un bestiario de las criaturas del mundo: su modelo 3D, su fuerza y hechizos, dónde viven, y tu registro de caza.
+## Notes-esMX: Un bestiario de las criaturas del mundo: su modelo 3D, su fuerza y hechizos, dónde viven, y tu registro de caza.
+## Notes-itIT: Un bestiario delle creature del mondo: il loro modello 3D, forza e incantesimi, dove vivono, e il tuo registro di caccia.
+## Notes-ptBR: Um bestiário das criaturas do mundo: seu modelo 3D, força e feitiços, onde vivem, e seu registro de caça.
+## Notes-ruRU: Бестиарий существ мира: их 3D-модель, сила и заклинания, где они живут, и ваш охотничий журнал.
+## Notes-koKR: 세상의 생물 도감: 3D 모델, 힘과 주문, 사는 곳, 그리고 내 사냥 기록.
+## Notes-zhCN: 世界生物图鉴：3D 模型、实力与法术、栖息地，以及你的狩猎记录。
+## Notes-zhTW: 世界生物圖鑑：3D 模型、實力與法術、棲息地，以及你的狩獵紀錄。
+## Category: Map & Minimap
+## Version: 1.0.0
+## Author: Jaekco
+## IconTexture: Interface\Icons\Ability_Tracking
+## RequiredDeps: Wanderer
+## OptionalDeps: WandererQuests, WandererMaps
+## SavedVariablesPerCharacter: WandererBestiaryDB
+## X-License: GPL-3.0-or-later
+## X-Curse-Project-ID: 1801469
+## X-Website: https://wanderer-addon.com
+
+Locales.lua
+Locales\[TextLocale].lua
+Data.lua
+Habitat.lua
+Names_enUS.lua
+Names_[TextLocale].lua
+Creatures.lua
+Journal.lua
+Card.lua
+Window.lua
