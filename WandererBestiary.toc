@@ -12,7 +12,7 @@
 ## Notes-zhCN: 世界生物图鉴：3D 模型、实力与法术、栖息地，以及你的狩猎记录。
 ## Notes-zhTW: 世界生物圖鑑：3D 模型、實力與法術、棲息地，以及你的狩獵紀錄。
 ## Category: Map & Minimap
-## Version: 1.0.0
+## Version: 1.0.3
 ## Author: Jaekco
 ## IconTexture: Interface\Icons\Ability_Tracking
 ## RequiredDeps: Wanderer

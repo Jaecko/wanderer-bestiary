@@ -61,8 +61,22 @@ end
 -- Kills -----------------------------------------------------------------------------------------------------------
 
 local counted, countedSize = {}, 0
-local engaged = {} -- guid -> true: a creature you fought
+local engaged, engagedSize = {}, 0 -- guid -> when you fought it
+local ENGAGED_MOST, ENGAGED_FOR = 400, 300 -- (one fled, evaded, another's: let go after a while, never kept all session)
 local lastFight = 0
+
+local function Engaged(guid)
+	if engagedSize >= ENGAGED_MOST then
+		local now, kept = GetTime(), 0
+		for other, at in pairs(engaged) do
+			if now - at > ENGAGED_FOR then engaged[other] = nil else kept = kept + 1 end
+		end
+		if kept >= ENGAGED_MOST then engaged, kept = {}, 0 end
+		engagedSize = kept
+	end
+	engaged[guid] = GetTime()
+	engagedSize = engagedSize + 1
+end
 
 local function Count(guid)
 	if counted[guid] then return false end
@@ -84,7 +98,8 @@ local function Kill(id, level)
 	db.total = db.total + 1
 	db.streak = db.streak + 1
 	if db.streak > db.best then db.best = db.streak end
-	level = level or (ns.Creature(id) or {}).high
+	-- (a skull's level, -1: the creature's own highest)
+	if not (level and level > 0) then level = (ns.Creature(id) or {}).high end
 	if level and (not db.highest or level > db.highest.level) then db.highest = { id = id, level = level, at = now } end
 	db.firstKill = db.firstKill or { id = id, at = now }
 	Changed()
@@ -140,7 +155,7 @@ local function Named(name)
 	local here = U.PlainName(Clean(Safe(GetRealZoneText)))
 	for _, creature in ipairs(list) do
 		for _, area in ipairs(creature.zones) do
-			if here and U.PlainName(U.AreaName(area)) == here then return creature.id end
+			if here and ns.PlainArea(area) == here then return creature.id end
 		end
 	end
 	return list[1].id
@@ -189,7 +204,7 @@ local function Engage(unit)
 	-- (your pet's fights are yours)
 	local onPet = Clean(Safe(UnitExists, "pet")) and (Clean(Safe(UnitThreatSituation, "pet", unit)) ~= nil
 		or Clean(Safe(UnitIsUnit, unit .. "target", "pet")))
-	if onYou or onPet or (fighting and Clean(Safe(UnitIsUnit, unit, "target"))) then engaged[guid] = true end
+	if onYou or onPet or (fighting and Clean(Safe(UnitIsUnit, unit, "target"))) then Engaged(guid) end
 end
 
 -- A creature seen dead: yours when you fought it, it was not another's, and you fought a moment ago.
@@ -204,7 +219,7 @@ local function Dead(unit)
 	if Clean(Safe(UnitIsTapDenied, unit)) then return end
 	local fighting = Clean(Safe(UnitAffectingCombat, "player")) or GetTime() - lastFight <= FIGHT_AFTER
 	if not fighting then return end
-	engaged[guid] = nil
+	engaged[guid], engagedSize = nil, engagedSize - 1
 	if Count(guid) then KillCorpse(id, Clean(Safe(UnitLevel, unit)), PAIR_DEAD) end
 end
 ns.Dead = Dead -- (tests)

@@ -78,6 +78,19 @@ function ns.All()
 	return list
 end
 
+-- An area's name made comparable (lower case, without the game's parentheses), asked of the game once per area: the
+-- list reads thousands of them at each drawing.
+local plainAreas = {}
+function ns.PlainArea(area)
+	if not area then return nil end
+	local plain = plainAreas[area]
+	if plain == nil then
+		plain = U.PlainName(U.AreaName(area)) or false
+		plainAreas[area] = plain
+	end
+	return plain or nil
+end
+
 -- The levels, as one number or a span.
 function ns.Levels(creature)
 	if not creature then return "" end

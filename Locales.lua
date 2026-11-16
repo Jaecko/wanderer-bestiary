@@ -9,7 +9,6 @@ local LOCALES = {
 		TITLE = "Bestiary",
 		ADDON = "Wanderer Bestiary",
 		NEEDS_WANDERER = "Bestiary needs a newer Wanderer (1.4.49 or later): update it.",
-		OFF = "Bestiary is off (Wanderer's options, Bestiary).",
 		OPEN_DESC = "The creatures of the world you met and fought: their model, their strength, their spells, and your hunting log.",
 		ENABLE = "Wanderer's bestiary",
 		ENABLE_DESC = "The bestiary's window and its cards. Off, nothing of it runs.",
@@ -22,7 +21,7 @@ local LOCALES = {
 		TAB_HERE = "Here",
 		TAB_ALL = "All",
 		TAB_RECORDS = "Records",
-		SEARCH_HINT = "Find a creature you met",
+		SEARCH_HINT = "Search a creature you met...",
 		KIND_ANY = "Every kind",
 		KIND_1 = "Beast",
 		KIND_2 = "Dragonkin",
@@ -131,6 +130,8 @@ local LOCALES = {
 		IMPORT_DONE = "Bestiary: %d creatures raised from %s (Records: take it back).",
 		MODEL_TIP_PAD = "The cross's left and right: turn it. Right stick: closer or further.",
 		HELP_TIP_PAD = "\"Here\": the creatures of the zone you are in; \"All\": every one. A creature you never met is in shadow (\"???\"), where it lives said when you stop on it.\nThe bottom button on a creature opens its card beside: its model (the cross's left and right: turned; the right stick: closer), where it lives (the bottom button: the way there), its strength and spells once you killed it, your log with it.\n\"Records\": your hunt counted; the bottom button on a creature's line opens its card.",
+		SEARCH_EMPTY = "Nothing found. Only the creatures you have met answer to their name.",
+		PLACE_KEYS = "Ctrl+click: to the route. Shift+click: a map link in the chat.",
 	},
 }
 ns.LOCALES = LOCALES

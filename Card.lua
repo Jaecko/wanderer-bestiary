@@ -10,6 +10,13 @@ local L = ns.L
 local W = Wanderer
 local U = W and W.Util
 local Skin = W and W.Skin
+-- (an item's modified click, the game's way: Shift links it, Ctrl tries it on; true when handled)
+local ItemClick = U and rawget(U, "ItemClick") or function(link)
+	if link and IsModifiedClick() and HandleModifiedItemClick then
+		HandleModifiedItemClick(link)
+		return true
+	end
+end
 
 local WIDTH = 380
 local MODEL_HEIGHT = 210
@@ -104,10 +111,31 @@ local function Item(at)
 		square.count = Skin.Text(square, "NumberFontNormalSmall", "text")
 		square.count:SetPoint("BOTTOMRIGHT", -2, 2)
 		Skin.ItemTooltip(square, function(self) return self.item end)
+		-- (a modified click, the game's way)
+		square:SetScript("OnMouseUp", function(self, button)
+			if button == "LeftButton" and self:IsMouseOver() and self.item then ItemClick((select(2, U.ItemInfo(self.item)))) end
+		end)
 		items[at] = square
 	end
 	square:Show()
 	return square
+end
+
+-- A place: the family's one grammar through Wanderer Maps (Shift+click a map link in the chat, Ctrl+click a step of
+-- the route, else followed); without it, the game's own pin.
+local function Maps()
+	local maps = _G.WandererMaps
+	return type(maps) == "table" and maps.Click ~= nil and (not maps.IsOn or maps.IsOn()) and maps or nil
+end
+local function GoTo(map, x, y, name)
+	local info = { kind = "creature", label = name }
+	local maps = Maps()
+	if maps then return maps.Click(map, x, y, name, info) end
+	return U.Go(map, x, y, name, info)
+end
+local function PlaceTip()
+	if Maps() and not (U.UsingPad and U.UsingPad()) then return { L.GO_THERE, Skin.Colorize(L.PLACE_KEYS, "blue") } end
+	return L.GO_THERE
 end
 
 -- The drawing ----------------------------------------------------------------------------------------------------
@@ -201,7 +229,6 @@ local function Draw()
 	for index, area in ipairs(hidden and {} or creature.zones) do
 		local row = Row()
 		Place(row, 24)
-		row.icon:SetTexture("Interface\\Minimap\\Tracking\\None")
 		row.icon:SetShown(false)
 		row.text:ClearAllPoints()
 		row.text:SetPoint("LEFT", row, "LEFT", 4, 0)
@@ -210,8 +237,9 @@ local function Draw()
 		local map, x, py = ns.PlaceOnMap(creature, index > 1 and area or nil)
 		row.more:SetShown(map ~= nil and x ~= nil)
 		if map and x then
-			row.tip = L.GO_THERE
-			row.onClick = function() U.Go(map, x, py, creature.name, { kind = "creature", label = creature.name }) end
+			-- (the family's grammar for a place, with Wanderer Maps: Shift a map link, Ctrl a step of the route)
+			row.tip = PlaceTip()
+			row.onClick = function() GoTo(map, x, py, creature.name) end
 		end
 	end
 	if not met then
@@ -295,7 +323,8 @@ local function Draw()
 	bar:Set(content:GetHeight(), scroll:GetHeight(), scroll:GetVerticalScroll())
 	-- The way there, at its foot.
 	local map, x = ns.PlaceOnMap(creature)
-	card.go:SetShown(map ~= nil and x ~= nil)
+	-- (the surprise kept: no way there either)
+	card.go:SetShown(map ~= nil and x ~= nil and not hidden)
 	-- (Wanderer Maps there and its atlas on: a Maps that says so is asked, an older one taken at its word)
 	local maps = _G.WandererMaps
 	local atlas = type(maps) == "table" and maps.ShowHabitat ~= nil and (not maps.AtlasOn or maps.AtlasOn())
@@ -360,6 +389,12 @@ local function Create()
 	card:SetWidth(WIDTH)
 	card:EnableMouse(true)
 	card:SetClampedToScreen(true)
+	-- (Escape closes it, as every window; alone in the middle of the screen it can be dragged aside)
+	if UISpecialFrames then table.insert(UISpecialFrames, "WandererBestiaryCard") end
+	card:SetMovable(true)
+	card:RegisterForDrag("LeftButton")
+	card:SetScript("OnDragStart", function(self) if not (owner and owner:IsShown()) then self:StartMoving() end end)
+	card:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 	local margin = Skin.Margin() + 8
 	Skin.CloseButton(card, function() ns.HideCard() end)
 	local _, title = Skin.Header(card, L.TITLE, "")
@@ -379,9 +414,10 @@ local function Create()
 	card.go = Skin.Button(card, L.GO_THERE, function()
 		local creature = shown and ns.Creature(shown)
 		local map, x, py = ns.PlaceOnMap(creature)
-		if map and x then U.Go(map, x, py, creature.name, { kind = "creature", label = creature.name }) end
+		if map and x then GoTo(map, x, py, creature.name) end
 	end, "main")
 	card.go:SetPoint("BOTTOMLEFT", card, "BOTTOMLEFT", margin, margin)
+	Skin.Tooltip(card.go, function() return PlaceTip() end)
 	-- Its habitat drawn on Wanderer Maps' atlas, point by point.
 	card.atlas = Skin.SmallButton(card, L.ON_ATLAS, function()
 		local maps = _G.WandererMaps

@@ -20,3 +20,7 @@ First public version.
 - With Wanderer Quests: a creature on a quest's sheet opens its card beside it. With Wanderer Maps: the creatures your quests ask for on a map are listed in the atlas, a click opens their card.
 - Works with the game's controller interface: the cross moves through the lists, the sticks turn the model and bring it closer.
 - Needs Wanderer 1.4.49 or later.
+
+### Fixed
+- A kill at skull level now counts for the highest level brought down.
+- Records: "Most complete zone" stays with the counts by kind, never under the import heading.

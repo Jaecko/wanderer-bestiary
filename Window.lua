@@ -13,6 +13,8 @@ local Clean = U and U.Clean
 
 local WIDTH, ROWS = 520, 11
 local UNKNOWN_ICON = "Interface\\Icons\\INV_Misc_QuestionMark"
+-- (a first kill's notice: the hunter's mark, a skull for a boss; never the question mark of a creature not met)
+local PREY_ICON, BOSS_ICON = "Interface\\Icons\\Ability_Hunter_SniperShot", "Interface\\TargetingFrame\\UI-TargetingFrame-Skull"
 
 local window, list, tabs, search, kindBox
 local page = "here"
@@ -25,7 +27,8 @@ local function On()
 	local settings = Settings()
 	return settings and settings.enabled
 end
-local function SayOff() W.Print(L.OFF) end
+-- (said as every addon of the family says it)
+local function SayOff() W.Print(L.EXT_TURNED_OFF:format(L.ADDON)) end
 
 -- The zone you are in: its map, its name (plain), to find the creatures living there.
 local function Here()
@@ -49,32 +52,30 @@ end
 
 local function LivesHere(creature, map, name)
 	for _, area in ipairs(creature.zones) do
-		if (name and U.PlainName(U.AreaName(area)) == name) or (map and U.MapOfArea and U.MapOfArea(area) == map) then return true end
+		if (name and ns.PlainArea(area) == name) or (map and U.MapOfArea and U.MapOfArea(area) == map) then return true end
 	end
 	return false
 end
 
 -- The list --------------------------------------------------------------------------------------------------------
 
+-- (one pass over every creature at each drawing: a scroll, a letter typed, a kill while it is open)
 local zoneCount = { met = 0, killed = 0, of = 0 }
 local function Gather()
 	wipe(entries)
 	local db = ns.Journal()
 	local map, name = Here()
 	zoneCount.met, zoneCount.killed, zoneCount.of, zoneCount.name = 0, 0, 0, name
-	if page == "here" then
-		for _, creature in ipairs(ns.All()) do
-			if LivesHere(creature, map, name) then
-				zoneCount.of = zoneCount.of + 1
-				if db.seen[creature.id] or db.kills[creature.id] then zoneCount.met = zoneCount.met + 1 end
-				if db.kills[creature.id] then zoneCount.killed = zoneCount.killed + 1 end
-			end
-		end
-	end
 	local folded = U.Fold and U.Fold(query) or query:lower()
 	for _, creature in ipairs(ns.All()) do
 		local met = db.seen[creature.id] ~= nil or db.kills[creature.id] ~= nil
-		local wanted = (page == "all" or LivesHere(creature, map, name))
+		local here = page == "here" and LivesHere(creature, map, name)
+		if here then
+			zoneCount.of = zoneCount.of + 1
+			if met then zoneCount.met = zoneCount.met + 1 end
+			if db.kills[creature.id] then zoneCount.killed = zoneCount.killed + 1 end
+		end
+		local wanted = (page == "all" or here)
 			and (kindChosen == 0 or creature.kind == kindChosen)
 			and (folded == "" or (met and (U.Fold and U.Fold(creature.name) or creature.name:lower()):find(folded, 1, true)))
 		if wanted then entries[#entries + 1] = { creature = creature, met = met, kills = db.kills[creature.id] or 0 } end
@@ -128,6 +129,10 @@ local function RecordRows()
 		local count = kinds[kind]
 		if count then Add(L["KIND_" .. kind], L.REC_KIND_VALUE:format(count.killed, count.of, math.floor(count.killed / count.of * 100 + 0.5))) end
 	end
+	-- (with the counts above: never under the import's heading)
+	if records.zone then
+		Add(L.REC_ZONE, L.REC_ZONE_VALUE:format(U.AreaName(records.zone.area) or "?", math.floor(records.zone.done / records.zone.of * 100 + 0.5)))
+	end
 	-- Bringing your counts from another addon (KillTrack, while it is loaded too), or taking the last import back.
 	local preview = ns.ImportPreview()
 	local undo = ns.Journal().importUndo
@@ -140,9 +145,6 @@ local function RecordRows()
 		out[#out + 1] = { name = L.IMPORT_UNDO:format(undo.source or "?"), value = "", run = function()
 			Skin.Ask(L.IMPORT_UNDO_ASK, function() ns.ImportUndo() end)
 		end }
-	end
-	if records.zone then
-		Add(L.REC_ZONE, L.REC_ZONE_VALUE:format(U.AreaName(records.zone.area) or "?", math.floor(records.zone.done / records.zone.of * 100 + 0.5)))
 	end
 	return out
 end
@@ -250,6 +252,8 @@ local function Draw()
 	end
 	list.titles[1]:SetText(U.Upper(records and "" or L.COL_LEVEL))
 	list.titles[2]:SetText(U.Upper(records and "" or L.COL_KILLS))
+	-- (a search that finds nothing: said, and that it knows only the creatures you met)
+	list.empty:SetText(not records and query ~= "" and L.SEARCH_EMPTY or L.EMPTY)
 	list.empty:SetShown(total == 0)
 end
 
@@ -324,7 +328,6 @@ local function Create()
 	window.zoneLine:SetPoint("TOPLEFT", window.zone, "BOTTOMLEFT", 0, -3)
 	window.zoneLine:SetPoint("RIGHT", window, "RIGHT", -margin, 0)
 	list:SetSort(sortBy, true)
-	list.empty:SetText(L.EMPTY)
 	local help = Skin.Help(window, L.HELP_TIP, "HEADING")
 	-- (a controller: its own keys, not the mouse's)
 	if help then
@@ -366,7 +369,7 @@ function ns.NewEntry(id)
 	local creature = ns.Creature(id)
 	if not (settings and settings.notify and creature and ns.RANKS[creature.rank]) then return end
 	W.Toast(L.NEW_TITLE, L.NEW_TEXT:format(creature.name, L[ns.RANKS[creature.rank]]), { kicker = L.ADDON, corner = true, duration = 6,
-		icon = UNKNOWN_ICON, tone = "gold", kind = "bestiaryNew", kindName = L.NEW_KIND, hint = L.OPEN_CARD,
+		icon = creature.rank == 3 and BOSS_ICON or PREY_ICON, tone = "gold", kind = "bestiaryNew", kindName = L.NEW_KIND, hint = L.OPEN_CARD,
 		onClick = function() ns.Open(id) end })
 end
 
