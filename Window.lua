@@ -250,8 +250,10 @@ local function Draw()
 		window.zone:SetText(L.ZONE_LINE:format(Clean(U.Safe(GetZoneText)) or "",zoneCount.met, zoneCount.of, zoneCount.killed))
 		window.zoneLine:Set(zoneCount.killed / zoneCount.of)
 	end
-	list.titles[1]:SetText(U.Upper(records and "" or L.COL_LEVEL))
-	list.titles[2]:SetText(U.Upper(records and "" or L.COL_KILLS))
+	-- (the game look: its column titles written as they are, as the kit's own)
+	local Caps = (Skin.GameWindows and Skin.GameWindows()) and tostring or U.Upper
+	list.titles[1]:SetText(Caps(records and "" or L.COL_LEVEL))
+	list.titles[2]:SetText(Caps(records and "" or L.COL_KILLS))
 	-- (a search that finds nothing: said, and that it knows only the creatures you met)
 	list.empty:SetText(not records and query ~= "" and L.SEARCH_EMPTY or L.EMPTY)
 	list.empty:SetShown(total == 0)
@@ -274,6 +276,8 @@ local function Create()
 	window.progress:SetPoint("RIGHT", window, "RIGHT", -margin, 0)
 	-- The pages.
 	local rule = Skin.Rule(window)
+	-- (the game look: the game's own divider under its tabs)
+	if Skin.GameWindows and Skin.GameWindows() then Skin.GameAtlas(rule, "Options_HorizontalDivider") end
 	rule:SetPoint("TOPLEFT", window.progress, "BOTTOMLEFT", 0, -30)
 	rule:SetPoint("RIGHT", window, "RIGHT", -margin, 0)
 	tabs = Skin.Tabs(window, { { "here", L.TAB_HERE }, { "all", L.TAB_ALL }, { "records", L.TAB_RECORDS } }, function(key)

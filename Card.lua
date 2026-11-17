@@ -34,6 +34,9 @@ local items = {}
 
 local RANK_TONES = { [1] = "gold", [2] = "blue", [3] = "red", [4] = "blue" }
 
+-- (the game look drawn: the game's own pieces where Wanderer draws its own)
+local function GameLook() return Skin.GameWindows and Skin.GameWindows() end
+
 -- The pieces, made once and used again at each drawing --------------------------------------------------------
 
 local function Text(template, role)
@@ -62,7 +65,7 @@ local function Row()
 		row:SetHeight(Skin.ROW.compact)
 		row.hover = row:CreateTexture(nil, "BACKGROUND")
 		row.hover:SetAllPoints()
-		row.hover:SetColorTexture(1, 1, 1, Skin.HOVER)
+		if Skin.HoverTint then Skin.HoverTint(row.hover) else row.hover:SetColorTexture(1, 1, 1, Skin.HOVER) end
 		row.hover:Hide()
 		row.icon = row:CreateTexture(nil, "ARTWORK")
 		row.icon:SetSize(18, 18)
@@ -148,13 +151,16 @@ end
 
 local function Kicker(words)
 	y = y + 14
-	local text = Text("GameTooltipTextSmall", "kicker")
-	text:SetText(U.Upper(words))
+	-- (the game look: its gold section titles, written as they are, over the game's own divider)
+	local game = GameLook()
+	local text = Text(game and "GameFontNormal" or "GameTooltipTextSmall", "kicker")
+	text:SetText(game and words or U.Upper(words))
 	Place(text, 16)
 	used.rules = used.rules + 1
 	local rule = rules[used.rules]
 	if not rule then
 		rule = Skin.Rule(content, false, 0.35)
+		if game then Skin.GameAtlas(rule, "Options_HorizontalDivider") end
 		rules[used.rules] = rule
 	end
 	rule:ClearAllPoints()
@@ -342,7 +348,8 @@ local function MakeModel(parent)
 	holder.ground = holder:CreateTexture(nil, "BACKGROUND")
 	holder.ground:SetAllPoints()
 	holder.ground:SetColorTexture(0.05, 0.06, 0.09, 0.85)
-	Skin.Edges(holder, Skin.RGB("gold", 0.35))
+	-- (the game look: a quiet grey edge, as the game's own model frames, no golden one)
+	Skin.Edges(holder, Skin.RGB(GameLook() and "muted" or "gold", 0.35))
 	local ok, model = pcall(CreateFrame, "PlayerModel", nil, holder)
 	if not ok then model = CreateFrame("Frame", nil, holder) end
 	model:SetPoint("TOPLEFT", 1, -1)
