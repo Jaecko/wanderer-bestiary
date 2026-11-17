@@ -298,8 +298,9 @@ local function Create()
 	tabs:SetPoint("BOTTOMLEFT", rule, "TOPLEFT", 0, 0)
 	tabs:Select(page)
 	-- A search, a kind.
-	search = Skin.CreateInput(window, nil, 40, { hint = L.SEARCH_HINT, onChange = function(_, typed)
-		query = typed or ""
+	search = Skin.CreateInput(window, nil, 40, { hint = L.SEARCH_HINT, onChange = function(input)
+		-- (the words written: the kit's second value only says whether they were typed)
+		query = input:GetText() or ""
 		list.offset = 0
 		Draw()
 	end })

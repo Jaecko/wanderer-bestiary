@@ -360,6 +360,8 @@ local function MakeModel(parent)
 	-- Dragged: turned; the wheel: closer or further.
 	model:SetScript("OnMouseDown", function(self) self.from = GetCursorPosition() end)
 	model:SetScript("OnMouseUp", function(self) self.from = nil end)
+	-- (closed while dragged, Escape with the button held: it no longer follows the mouse when it comes back)
+	model:SetScript("OnHide", function(self) self.from = nil end)
 	model:SetScript("OnUpdate", function(self)
 		if not self.from then return end
 		local at = GetCursorPosition()
