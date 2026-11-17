@@ -12,6 +12,10 @@ local Skin = W and W.Skin
 local Clean = U and U.Clean
 
 local WIDTH, ROWS = 520, 11
+-- (the game look: the summary's line from the window's top, its kills left of the "?" and the cog)
+local GAME_LINE, GAME_STATS_RIGHT = 8, 52
+-- The room the tabs take over their divider: the game's are taller (their art about 37).
+local function TabsRoom() return (Skin.GameWindows and Skin.GameWindows()) and 42 or 30 end
 local UNKNOWN_ICON = "Interface\\Icons\\INV_Misc_QuestionMark"
 -- (a first kill's notice: the hunter's mark, a skull for a boss; never the question mark of a creature not met)
 local PREY_ICON, BOSS_ICON = "Interface\\Icons\\Ability_Hunter_SniperShot", "Interface\\TargetingFrame\\UI-TargetingFrame-Skull"
@@ -266,10 +270,16 @@ local function Create()
 	local _, title, margin = Skin.Header(window, "Wanderer", L.TITLE, { settings = "ext:bestiary" })
 	-- How much of the world you discovered: its words, a golden line; your kills on the right.
 	window.summary = Skin.Text(window, "GameTooltipTextSmall", "soft")
-	window.summary:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
+	-- (the game look: the heading in the game's bar; this line on the top one, level with the "?" and the cog)
+	local game = Skin.GameWindows and Skin.GameWindows()
+	if game then
+		window.summary:SetPoint("TOPLEFT", window, "TOPLEFT", margin, -GAME_LINE)
+	else
+		window.summary:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
+	end
 	window.stats = Skin.Text(window, "GameTooltipTextSmall", "soft")
 	window.stats:SetPoint("BOTTOMRIGHT", window.summary, "BOTTOMRIGHT", 0, 0)
-	window.stats:SetPoint("RIGHT", window, "RIGHT", -margin, 0)
+	window.stats:SetPoint("RIGHT", window, "RIGHT", game and -GAME_STATS_RIGHT or -margin, 0)
 	window.stats:SetJustifyH("RIGHT")
 	window.progress = Skin.ProgressLine(window, 2)
 	window.progress:SetPoint("TOPLEFT", window.summary, "BOTTOMLEFT", 0, -5)
@@ -277,8 +287,8 @@ local function Create()
 	-- The pages.
 	local rule = Skin.Rule(window)
 	-- (the game look: the game's own divider under its tabs)
-	if Skin.GameWindows and Skin.GameWindows() then Skin.GameAtlas(rule, "Options_HorizontalDivider") end
-	rule:SetPoint("TOPLEFT", window.progress, "BOTTOMLEFT", 0, -30)
+	if game then Skin.GameAtlas(rule, "Options_HorizontalDivider") end
+	rule:SetPoint("TOPLEFT", window.progress, "BOTTOMLEFT", 0, -TabsRoom())
 	rule:SetPoint("RIGHT", window, "RIGHT", -margin, 0)
 	tabs = Skin.Tabs(window, { { "here", L.TAB_HERE }, { "all", L.TAB_ALL }, { "records", L.TAB_RECORDS } }, function(key)
 		page = key
@@ -339,7 +349,9 @@ local function Create()
 			if U.UsingPad and U.UsingPad() then Skin.ShowTip(self, L.HELP_TIP_PAD, "ANCHOR_BOTTOM") end
 		end)
 	end
-	window:SetSize(WIDTH, margin * 2 + 30 + 26 + 50 + 10 + 24 + 10 + list:GetHeight() + 8)
+	-- (above the summary: the heading's room, or only the top line's in the game look)
+	local head = game and GAME_LINE or margin + 36
+	window:SetSize(WIDTH, margin + head + 20 + TabsRoom() + 20 + 10 + 24 + 10 + list:GetHeight() + 8)
 	window:HookScript("OnShow", function(self)
 		self:SetScale(Skin.FitScale(self))
 		Draw()

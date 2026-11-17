@@ -403,15 +403,23 @@ local function Create()
 	card:SetScript("OnDragStart", function(self) if not (owner and owner:IsShown()) then self:StartMoving() end end)
 	card:SetScript("OnDragStop", function(self) self:StopMovingOrSizing() end)
 	local margin = Skin.Margin() + 8
+	-- (the game look: the game's frame as the windows', the creature's name in its title bar, the cross there)
+	if GameLook() and Skin.GameFrame then Skin.GameFrame(card) end
 	Skin.CloseButton(card, function() ns.HideCard() end)
 	local _, title = Skin.Header(card, L.TITLE, "")
 	card.title = title
 	title:SetPoint("RIGHT", card, "RIGHT", -margin - 18, 0)
 	title:SetWordWrap(true)
 	card.rank = Skin.Chip(card)
-	card.rank:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
 	card.levels = Skin.Text(card, "GameTooltipText", "soft")
-	card.levels:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -26)
+	-- (in the game's frame the title is in its bar, unseen here: its rank and levels just under the bar)
+	if card.gameArt then
+		card.rank:SetPoint("TOPLEFT", card, "TOPLEFT", margin, -8)
+		card.levels:SetPoint("TOPLEFT", card, "TOPLEFT", margin, -28)
+	else
+		card.rank:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
+		card.levels:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -26)
+	end
 	local model = MakeModel(card)
 	model:SetPoint("TOPLEFT", card.levels, "BOTTOMLEFT", 0, -10)
 	model:SetPoint("RIGHT", card, "RIGHT", -margin, 0)
